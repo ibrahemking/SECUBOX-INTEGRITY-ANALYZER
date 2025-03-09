@@ -43,11 +43,17 @@ sudo apt install nuclei -y
 git clone https://github.com/projectdiscovery/nuclei-templates.git ~/.nuclei-templates
 
 للتحقق من نجاح العملية:
+
 ls ~/.nuclei-templates
+
 5️⃣ تشغيل التطبيق
+
 python app.py
+
 ثم افتح المتصفح وانتقل إلى:
+
 http://127.0.0.1:5000/
+
 🔒 نظام التشفير والأمان
 يعتمد SECUBOX INTEGRITY ANALYZER على تشفير البيانات لحماية الملفات والتقارير باستخدام اشتقاق مفتاح التشفير من كلمة المرور عبر خوارزمية: PBKDF2HMAC (Password-Based Key Derivation Function 2 with HMAC).
 
