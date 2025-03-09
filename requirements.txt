@@ -1,0 +1,17 @@
+Flask
+Werkzeug
+bcrypt
+cryptography
+flask-session
+flask-wtf
+flask-login
+requests
+logging
+subprocess
+sqlite3
+zipfile
+tempfile
+json
+mimetypes
+semgrep
+bandit

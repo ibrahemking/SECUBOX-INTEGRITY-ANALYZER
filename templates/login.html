@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../static/css/login.css">
+
+</head>
+
+<body class="flex items-center justify-center min-h-screen px-4">
+
+    <header class="fixed top-0 w-full bg-gray-800 shadow-lg z-50 py-4 transition-all">
+        <div class="container mx-auto flex justify-between items-center px-6">
+            <!-- رابط يعود إلى الصفحة الرئيسية -->
+            <a href="/" class="text-2xl font-bold text-indigo-400 hover:text-indigo-500 transition-colors">
+                WhiteBox
+            </a>
+        </div>
+    </header>
+    
+
+    <div class="bg-gray-800 shadow-md rounded-lg px-8 pt-6 pb-8 w-full max-w-md">
+
+        <!-- Flash Messages -->
+        <!-- {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div>
+            {% for category, message in messages %}
+            <div class="flex items-center justify-between bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                <span class="error-message"><i class="fas fa-exclamation-circle mr-2"></i>{{ message }}</span>
+                <button class="text-red-500 hover:text-red-800" onclick="this.parentElement.remove();">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %} -->
+
+        <h2 class="text-3xl font-bold text-center mb-4">Log In</h2>
+        <p class="text-center text-gray-400 mb-6">Please enter your email or username and password to log in.</p>
+
+        <!-- Login Form -->
+        <form id="login-form" action="/login" method="POST" class="space-y-6">
+
+            <!-- Identifier Field -->
+            <div class="form-group relative">
+                <div class="flex items-center border rounded-lg overflow-hidden">
+                    <label for="login__identifier" class="px-4 py-2 bg-gray-700">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </label>
+                    <input id="login__identifier" type="text" name="identifier" placeholder="Email or Username" required
+                        class="flex-1 px-4 py-2 focus:outline-none bg-gray-700 text-white rounded-lg">
+                </div>
+                <span id="identifier-error" class="validation-message hidden">Please enter your email or username.</span>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group relative">
+                <div class="flex items-center border rounded-lg overflow-hidden">
+                    <label for="login__password" class="px-4 py-2 bg-gray-700">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </label>
+                    <input id="login__password" type="password" name="password" placeholder="Password" required
+                        class="flex-1 px-4 py-2 focus:outline-none bg-gray-700 text-white rounded-lg">
+                    <button type="button" class="password-toggle px-4 py-2 bg-gray-700 text-gray-400">
+                        <i class="fas fa-eye" id="togglePassword"></i>
+                    </button>
+                </div>
+                <span id="password-error" class="validation-message hidden">Password is required.</span>
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit"
+                    class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg rounded-lg transition duration-300">
+                    Log In
+                </button>
+            </div>
+        </form>
+
+        <!-- Additional Links -->
+        <p class="text-center text-sm mt-6 text-gray-400">
+            Don't have an account? <a href="signup" class="text-blue-400 hover:underline font-medium">Sign up here</a>
+        </p>
+        <p class="text-center text-sm mt-2 text-gray-400">
+            Forgot your password? <a href="#" class="text-blue-400 hover:underline font-medium">Reset it here</a>
+        </p>
+    </div>
+
+    <!-- Validation Script -->
+    <script>
+        const form = document.getElementById('login-form');
+        const identifierInput = document.getElementById('login__identifier');
+        const passwordInput = document.getElementById('login__password');
+        const togglePassword = document.getElementById('togglePassword');
+
+        form.addEventListener('submit', (e) => {
+            let isValid = true;
+
+            if (!identifierInput.value.trim()) {
+                document.getElementById('identifier-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('identifier-error').classList.add('hidden');
+            }
+
+            if (!passwordInput.value.trim()) {
+                document.getElementById('password-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('password-error').classList.add('hidden');
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        // Toggle password visibility
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePassword.classList.toggle('fa-eye-slash');
+        });
+    </script>
+</body>
+
+</html>

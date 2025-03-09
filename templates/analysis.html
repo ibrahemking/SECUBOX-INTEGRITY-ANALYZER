@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your WhiteBox Analysis</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+  <link rel="stylesheet" href="../static/css/analysis.css" />
+</head>
+
+<body class="text-gray-200 bg-gray-900 pt-24">
+  <header class="fixed top-0 w-full bg-gray-800 shadow-md z-50">
+      <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+          <!-- <a href="#" class="text-2xl font-bold text-indigo-400">WhiteBox</a> -->
+          <a href="#" class="flex flex-col items-center text-white font-bold">
+            <div class="flex items-center space-x-2 text-4xl">
+                <span class="text-indigo-400 tracking-widest">SIA</span>
+                <i class="fas fa-cube text-purple-400 text-3xl"></i>
+            </div>
+            <span class="text-xs text-purple-300 tracking-widest uppercase mt-1">SecuBox Integrity Analyzer</span>
+          </a>      
+          <nav>
+              <ul class="flex space-x-6">
+                  <li><a href="#features" class="hover:text-indigo-400">Customization</a></li>
+                  <li><a href="#report" class="hover:text-indigo-400">Report</a></li>
+                  <li><a href="#projects" class="hover:text-indigo-400">Projects</a></li>
+                  <li><a href="#contact" class="hover:text-indigo-400">Contact</a></li>
+                  <li><a href="/analysis-black" class="bg-indigo-500 px-4 py-2 rounded-lg text-white hover:bg-indigo-600">Black-Box</a></li>
+                  <li><a href="/logout" class="bg-indigo-500 px-4 py-2 rounded-lg text-white hover:bg-indigo-600">Logout</a></li>
+              </ul>
+          </nav>
+      </div>
+  </header>
+
+  <!-- Welcome Section -->
+  <section class="pt-28 pb-10 bg-gray-900 text-center">
+    <div class="container mx-auto">
+        <h1 class="text-5xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-transparent bg-clip-text drop-shadow-lg animate-fade-in">
+            Welcome, {{ username }}
+        </h1>
+        <p class="text-xl mt-4 text-gray-400 opacity-90">Start analyzing your projects below:</p>
+        
+        <!-- أيقونة متوهجة تتحرك لجذب الانتباه -->
+        <div class="mt-6 flex justify-center">
+            <a href="#next-section" class="relative inline-block px-6 py-3 font-bold text-white bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg shadow-lg transition-transform transform hover:scale-110 pulse-effect">
+                Get Started 
+                <i class="fas fa-chevron-down ml-2"></i>
+            </a>
+        </div>
+    </div>
+  </section>
+
+  <style>
+  @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+      animation: fadeIn 1s ease-out;
+  }
+
+  /* تأثير النبض */
+  @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
+      50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(139, 92, 246, 0.7); }
+      100% { transform: scale(1); box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
+  }
+  .pulse-effect {
+      animation: pulse 1.5s infinite;
+  }
+  </style>
+  <!-- File Upload Section -->
+  <section id="next-section" class="py-20 bg-gray-800 text-center">
+    <div class="container mx-auto">
+      <form action="/analysis?username={{ username }}" method="POST" enctype="multipart/form-data">
+        <!-- File Upload -->
+        <label for="file" class="block border-dashed border-4 border-gray-500 rounded-lg py-10 px-6 hover:border-indigo-500 hover:bg-gray-700 transition relative mb-8">
+          <span id="drop-title" class="block mb-4 text-gray-300 text-xl">Drop files here</span>
+          <!-- Display file name -->
+          <span id="file-name" class="block mb-4 text-indigo-400 text-lg hidden">Selected File: <span id="file-name-text"></span></span>
+          <input type="file" id="file" name="file" class="hidden" accept=".c,.cpp,.cs,.java,.js,.ts,.php,.rb,.rs,.go,.swift,.scala,.json,.yaml,.yml,.sol,.dockerfile,.tf,.kt,.sh,.el,.ml,.py,.html,.pl,.lua,.tsx,.cmake,.bash,.ps1,.m,.dart" onchange="updateFileName()">
+          <button type="button" class="custom-button mt-4" onclick="document.getElementById('file').click()">Choose File</button>
+        </label>
+        <script>
+            function updateFileName() {
+                const fileInput = document.getElementById('file');
+                const fileNameDisplay = document.getElementById('file-name');
+                const fileNameText = document.getElementById('file-name-text');
+
+                // التأكد من وجود ملف محدد
+                if (fileInput.files.length > 0) {
+                    const fileName = fileInput.files[0].name;
+                    fileNameText.textContent = fileName;
+                    fileNameDisplay.classList.remove('hidden');
+
+                    // استخراج الامتداد
+                    const extension = fileName.split('.').pop().toLowerCase();
+                    console.log("📂 تم رفع الملف بامتداد:", extension);
+
+                    // إعادة تعيين (إلغاء تحديد) جميع الأدوات أولًا
+                    const flawfinder = document.getElementById('flawfinder');
+                    const bandit = document.getElementById('bandit');
+                    const semgrep = document.getElementById('semgrep');
+
+                    flawfinder.checked = false;
+                    bandit.checked = false;
+                    semgrep.checked = false;
+
+                    // تحديد الأدوات بناءً على نوع الملف
+                    if (extension === 'py') {
+                        console.log("✅ تم اختيار: Bandit و Semgrep");
+                        bandit.checked = true;
+                        semgrep.checked = true;
+                    } else if (['c', 'cpp'].includes(extension)) {
+                        console.log("✅ تم اختيار: Flawfinder و Semgrep");
+                        flawfinder.checked = true;
+                        semgrep.checked = true;
+                    } else {
+                        console.log("✅ تم اختيار: Semgrep فقط للغات الأخرى");
+                        semgrep.checked = true;
+                    }
+
+                    // تحديث الواجهة لجعل الأدوات المختارة مرئية بوضوح
+                    document.querySelectorAll('.service-option').forEach(option => {
+                        const checkbox = option.querySelector('input[type="checkbox"]');
+                        if (checkbox.checked) {
+                            option.classList.add('bg-blue-600', 'text-white');
+                        } else {
+                            option.classList.remove('bg-blue-600', 'text-white');
+                        }
+                    });
+                } else {
+                    fileNameDisplay.classList.add('hidden');
+                }
+            }
+        </script>
+
+        <!-- Options Section -->
+        <section id="features" class="py-20 bg-gray-800 text-center">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Services -->
+            <div class="bg-gray-700 p-6 rounded-lg shadow-lg hover:shadow-2xl transition">
+              <h3 class="text-2xl font-bold text-indigo-400 mb-4">Services</h3>
+              <ul class="text-left text-gray-300 space-y-4">
+                <li>
+                  <label for="flawfinder" class="service-option flex items-center justify-between p-4 border rounded-lg cursor-pointer transition">
+                    <input type="checkbox" id="flawfinder" name="services[]" value="Flawfinder" class="hidden">
+                    <span>Flawfinder</span>
+                  </label>
+                </li>
+                <li>
+                  <label for="bandit" class="service-option flex items-center justify-between p-4 border rounded-lg cursor-pointer transition">
+                    <input type="checkbox" id="bandit" name="services[]" value="Bandit" class="hidden">
+                    <span>Bandit</span>
+                  </label>
+                </li>
+                <li>
+                  <label for="semgrep" class="service-option flex items-center justify-between p-4 border rounded-lg cursor-pointer transition">
+                    <input type="checkbox" id="semgrep" name="services[]" value="Semgrep" class="hidden">
+                    <span>Semgrep</span>
+                  </label>
+                </li>
+              </ul>
+            </div>
+            <!-- Report Type -->
+            <div class="bg-gray-700 p-6 rounded-lg shadow-lg hover:shadow-2xl transition">
+              <h3 class="text-2xl font-bold text-indigo-400 mb-4">Report Type</h3>
+              <ul class="text-left text-gray-300 space-y-4">
+                <li>
+                  <label for="report_html" class="report-option flex items-center justify-between p-4 border rounded-lg cursor-pointer transition">
+                    <input type="radio" id="report_html" name="report_type" value="html" class="hidden">
+                    <span>HTML</span>
+                  </label>
+                </li>
+                    <!-- باقي الخيارات مع تعطيلها وجعلها باهتة -->
+    <li>
+      <label class="report-option flex items-center justify-between p-4 border rounded-lg opacity-50 cursor-not-allowed">
+        <input type="radio" name="report_type" value="json" class="hidden" disabled>
+        <span>JSON (Coming Soon)</span>
+      </label>
+    </li>
+    <li>
+      <label class="report-option flex items-center justify-between p-4 border rounded-lg opacity-50 cursor-not-allowed">
+        <input type="radio" name="report_type" value="csv" class="hidden" disabled>
+        <span>CSV (Coming Soon)</span>
+      </label>
+    </li>
+    <li>
+      <label class="report-option flex items-center justify-between p-4 border rounded-lg opacity-50 cursor-not-allowed">
+        <input type="radio" name="report_type" value="sarif" class="hidden" disabled>
+        <span>SARIF (Coming Soon)</span>
+      </label>
+    </li>
+
+              </ul>
+            </div>
+          </div>
+
+          <!-- Analyze Button -->
+          <button type="submit" class="custom-button mt-8 w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition duration-300">
+            Analyze
+          </button>
+        </form>
+      </div>
+  </section>
+    <script>
+      // For Services (Checkboxes)
+      document.querySelectorAll('.service-option').forEach(option => {
+        option.addEventListener('click', () => {
+          const checkbox = option.querySelector('input[type="checkbox"]');
+          checkbox.checked = !checkbox.checked;
+          option.classList.toggle('bg-blue-600', checkbox.checked);
+          option.classList.toggle('text-white', checkbox.checked);
+        });
+      });
+
+      // For Report Type (Radio Buttons)
+      document.querySelectorAll('.report-option').forEach(option => {
+        option.addEventListener('click', () => {
+          document.querySelectorAll('.report-option').forEach(o => o.classList.remove('bg-blue-600', 'text-white'));
+          const radio = option.querySelector('input[type="radio"]');
+          radio.checked = true;
+          option.classList.add('bg-blue-600', 'text-white');
+        });
+      });
+    </script>
+  </section>
+
+  <!-- Reports Section -->
+  <section id="report" class="py-20 bg-gray-900 text-center">
+    <div class="container mx-auto">
+      <h2 class="text-4xl font-bold text-indigo-400">Your Reports</h2>
+      <p class="text-gray-400 mb-8">Explore your generated reports below:</p>
+      <!-- Using Jinja2 groupby filter on index 1 (tool_name) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for group in reports|groupby("1") %}
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h3 class="text-2xl font-bold text-indigo-400 mb-4 flex items-center justify-center">
+            <!-- مثال لأيقونة تعتمد على الأداة (يمكن التعديل) -->
+            {% if group.grouper == 'Flawfinder' %}
+            <i class="fas fa-shield-alt mr-2"></i>
+            {% elif group.grouper == 'Bandit' %}
+            <i class="fas fa-shield-alt mr-2"></i>
+            {% elif group.grouper == 'Semgrep' %}
+            <i class="fas fa-shield-alt mr-2"></i>
+            {% else %}
+            <i class="fas fa-tools mr-2"></i>
+            {% endif %}
+            {{ group.grouper }}
+          </h3>
+          <ul class="space-y-4">
+            {% for report in group.list %}
+            <li class="bg-gray-700 p-4 rounded-lg shadow hover:shadow-xl transition cursor-pointer"
+              onclick="openModal('{{ report[0]|escapejs }}', '{{ report[1]|escapejs }}', '{{ report[2]|escapejs }}', '{{ report[3]|escapejs }}')">
+              <div class="flex items-center justify-between">
+                <span class="text-white font-semibold">{{ report[3] }}</span>
+                <div class="flex space-x-2">
+                  <!-- <a href="#" onclick="viewReport(event, '{{ report[0]|escapejs }}')" class="text-indigo-400 hover:text-indigo-600">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a href="#" onclick="downloadReport(event, '{{ report[0]|escapejs }}')" class="text-blue-400 hover:text-blue-600">
+                    <i class="fas fa-download"></i>
+                  </a>-->
+                  <a href="#" onclick="viewReport(event, '{{ report[0].split('/')[-1] | escapejs }}')" class="text-indigo-400 hover:text-indigo-600">
+                    <i class="fas fa-eye fa-lg"></i>
+                  </a>
+                  
+                  <a href="#" onclick="downloadReport(event, '{{ report[0] | escapejs }}')" class="text-blue-400 hover:text-blue-600">
+                      <i class="fas fa-download fa-lg"></i>
+                  </a>
+                  <a href="#" onclick="deleteReport(event, '{{ username }}', 'reports_whitebox', '{{ report[0]|escapejs }}')" class="text-red-400 hover:text-red-600">
+                    <i class="fas fa-trash-alt"></i>
+                  </a>
+                
+                
+                </div>
+              </div>
+              <p class="text-gray-300 text-sm">Created: {{ report[2] }}</p>
+              <!-- <p class="text-gray-300 text-sm">Your Hash File: {{ report[4] }}</p> -->
+              <p class="text-gray-300 text-sm">
+                Your Hash File:
+                {% if report[4] %}
+                    <span id="hash-{{ loop.index }}" 
+                          class="cursor-pointer text-indigo-400 transition-all duration-300 ease-in-out"
+                          onclick="copyHash('{{ report[4] }}', this)">
+                        {{ report[4][:10] }}...
+                    </span>
+                {% else %}
+                    <span class="text-gray-500">N/A</span>
+                {% endif %}
+              </p>
+            
+            
+            
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal for Report Details -->
+  <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-gray-800 rounded-lg shadow-xl w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 p-6 relative max-h-[90vh] overflow-auto">
+        <button class="absolute top-2 right-2 text-gray-300 hover:text-white" onclick="closeModal()">
+            <i class="fas fa-times fa-lg"></i>
+        </button>
+        <h3 id="modalProjectName" class="text-2xl font-bold text-indigo-400 mb-4">Report Name</h3>
+        <p class="text-white mb-2"><strong>Tool:</strong> <span id="modalTool"></span></p>
+        <p class="text-white mb-2"><strong>Created At:</strong> <span id="modalCreatedAt"></span></p>
+
+        <!-- زيادة حجم المحتوى داخل الـ Modal -->
+        <div id="modalDetails" class="bg-gray-900 p-4 rounded-lg overflow-auto w-full h-[70vh] max-h-[70vh] text-white">
+            <!-- سيتم تحميل التقرير هنا -->
+        </div>
+    </div>
+  </div>
+
+
+
+  <section id="projects" class="py-20 bg-gray-800 text-center">
+    <div class="container mx-auto">
+        <h2 class="text-4xl font-bold text-indigo-400">Your Projects</h2>
+        <p class="text-gray-400 mb-8">Manage your uploaded projects below:</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for project in projects %}
+            <div class="bg-gray-900 p-6 rounded-lg shadow-lg text-left">
+                <h3 class="text-xl font-bold text-white">{{ project[1] }}</h3>
+                <p class="text-gray-400">Language: {{ project[3] }}</p>
+                <p class="text-gray-400">Uploaded At: {{ project[4] }}</p>
+                <p class="text-gray-300 text-sm">
+                  Your Hash File:
+                  {% if project[5] %}
+                      <span id="hash-project-{{ loop.index }}" 
+                            class="cursor-pointer text-indigo-400 transition-all duration-300 ease-in-out"
+                            onclick="copyHash('{{ project[5] }}', this)">
+                          {{ project[5][:10] }}...
+                      </span>
+                  {% else %}
+                      <span class="text-gray-500">N/A</span>
+                  {% endif %}
+                </p>
+              
+
+
+                <div class="mt-4 flex space-x-4">
+                    <!-- زر العرض (يستخدم نافذة منبثقة بدلاً من فتح الملف مباشرة) -->
+                    <a href="#" onclick="viewProject(event, '{{ username }}', '{{ project[2] | safe }}')" 
+                       class="text-indigo-400 hover:text-indigo-600">
+                        <i class="fas fa-eye fa-lg"></i>
+                    </a>
+                    <!-- زر التحميل -->
+                    <a href="{{ url_for('download_project', project_id=project[0]) }}" 
+                       download
+                       class="text-blue-400 hover:text-blue-600">
+                        <i class="fas fa-download fa-lg"></i>
+                    </a>
+                    <!-- زر الحذف -->
+                    <!-- <form action="{{ url_for('delete_project', project_id=project[0]) }}" method="post" class="inline">
+                        <button type="submit" class="text-red-400 hover:text-red-600">
+                            <i class="fas fa-trash-alt fa-lg"></i>
+                        </button>
+                    </form> -->
+                    <a href="#" onclick="deleteProject(event, '{{ project[0] }}', this)" class="text-red-400 hover:text-red-600">
+                      <i class="fas fa-trash-alt fa-lg"></i>
+                    </a>
+                  
+                  
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+  </section>
+
+  <!-- Modal for Viewing Project Content -->
+  <div id="projectModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-gray-800 rounded-lg shadow-xl w-11/12 md:w-2/3 lg:w-1/2 p-6 relative">
+        <button class="absolute top-2 right-2 text-gray-300 hover:text-white" onclick="closeProjectModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <h3 id="modalProjectTitle" class="text-2xl font-bold text-indigo-400 mb-4">Project Name</h3>
+        <pre id="modalProjectContent" class="text-gray-300 bg-gray-900 p-4 rounded-lg overflow-auto max-h-96"></pre>
+    </div>
+  </div>
+
+
+  <!-- Contact Section -->
+  <section id="contact" class="py-20 bg-gray-800 text-center">
+    <div class="container mx-auto">
+      <h2 class="text-4xl font-bold text-indigo-400">Contact Us</h2>
+      <p class="text-gray-400 mt-4 mb-10">We’re here to help. Feel free to reach out!</p>
+      <form class="max-w-lg mx-auto">
+        <input type="text" placeholder="Your Name" class="block w-full p-4 mb-4 bg-gray-700 text-gray-300 rounded-lg">
+        <input type="email" placeholder="Your Email" class="block w-full p-4 mb-4 bg-gray-700 text-gray-300 rounded-lg">
+        <textarea placeholder="Your Message" rows="4" class="block w-full p-4 mb-6 bg-gray-700 text-gray-300 rounded-lg"></textarea>
+        <button class="custom-button w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition duration-300">
+          Send Message
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Modal Script -->
+  <script>
+  function openModal(details, tool, createdAt, projectName) {
+    document.getElementById("modalProjectName").textContent = projectName;
+    document.getElementById("modalTool").textContent = tool;
+    document.getElementById("modalCreatedAt").textContent = createdAt;
+
+    // التحقق إذا كان التقرير بصيغة HTML أو ملف نصي
+    if (details.endsWith('.html')) {
+        let username = "{{ username }}";  // جلب اسم المستخدم
+        let reportUrl = `/view-report/${username}/reports_whitebox/${encodeURIComponent(details)}`;
+
+        document.getElementById("modalDetails").innerHTML = `<iframe src="${reportUrl}" class="w-full h-96 bg-white"></iframe>`;
+    } else {
+        document.getElementById("modalDetails").textContent = details;
+    }
+
+    document.getElementById("reportModal").classList.remove("hidden");
+  }
+
+
+  function viewReport(event, filename) {
+      event.preventDefault();  // منع الانتقال إلى رابط آخر
+
+      let username = "{{ username }}";  // جلب اسم المستخدم
+      let reportUrl = `/view-report/${username}/reports_whitebox/${encodeURIComponent(filename)}`;
+
+      // تحديث الـ Modal ليحتوي على التقرير داخل iframe
+      document.getElementById("modalDetails").innerHTML = `<iframe src="${reportUrl}" class="w-full h-96 bg-white"></iframe>`;
+
+      document.getElementById("reportModal").classList.remove("hidden");
+  }
+
+
+    // إغلاق المودل عند الضغط على زر الإغلاق
+    function closeModal() {
+        document.getElementById("reportModal").classList.add("hidden");
+    }
+
+    // إغلاق المودل عند النقر خارج النافذة
+    document.getElementById("reportModal").addEventListener("click", function(event) {
+        if (event.target === this) {
+            closeModal();
+        }
+    });
+
+
+    function downloadReport(event, filename) {
+    event.preventDefault();  // منع إعادة تحميل الصفحة
+
+    let username = "{{ username }}";  // جلب اسم المستخدم
+    let sanitizedFilename = filename.replace(`uploads/${username}/reports_whitebox/`, ""); // تنظيف المسار
+
+    let downloadUrl = `/download_report?report_path=uploads/${username}/reports_whitebox/${encodeURIComponent(sanitizedFilename)}`;
+
+    // إنشاء `<a>` ديناميكيًا لتنزيل الملف فقط دون عرضه
+    let downloadLink = document.createElement("a");
+    downloadLink.href = downloadUrl;
+    downloadLink.download = sanitizedFilename;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    // إغلاق الـ Modal مباشرة بعد الضغط على الحفظ
+    closeModal();
+}
+
+
+
+
+
+    function deleteReport(event, username, reportType, filePath) {
+    event.preventDefault();  // منع إعادة تحميل الصفحة
+    event.stopPropagation();  // منع تأثيرات أخرى
+
+    // استخراج اسم الملف فقط من المسار
+    let filename = filePath.split('/').pop();  
+
+    fetch(`/delete-report/${username}/${reportType}/${encodeURIComponent(filename)}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => response.json())  // تحويل الاستجابة إلى JSON
+    .then(data => {
+        if (data.success) {
+            // حذف العنصر من الواجهة فورًا
+            const reportItem = event.target.closest('li');
+            if (reportItem) {
+                reportItem.remove();
+            }
+        } else {
+            console.error("Failed to delete report:", data.message);
+        }
+    }).catch(error => console.error("Error deleting report:", error));
+}
+
+function viewProject(event, username, filePath) {
+    event.preventDefault();
+
+    // تنظيف المسار وإزالة "uploads/username/projects/"
+    let filename = filePath.replace(`uploads/${username}/projects/`, '');
+
+    fetch(`/view-project/${username}/${encodeURIComponent(filename)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert("Error: " + data.error);
+            } else {
+                document.getElementById('modalProjectTitle').textContent = data.filename;
+                document.getElementById('modalProjectContent').textContent = data.content;
+                document.getElementById('projectModal').classList.remove('hidden');
+            }
+        })
+        .catch(error => console.error("Error fetching file:", error));
+}
+
+function closeProjectModal() {
+    document.getElementById('projectModal').classList.add('hidden');
+}
+// إغلاق المودل عند الضغط خارج النافذة
+document.getElementById('projectModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        closeProjectModal();
+    }
+});
+
+function deleteProject(event, projectId, element) {
+    event.preventDefault();  // منع تحديث الصفحة
+
+    fetch(`/delete_project/${projectId}`, { method: 'POST' })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // إزالة العنصر من الصفحة فورًا بعد الحذف
+            let projectCard = element.closest('.bg-gray-900');
+            if (projectCard) {
+                projectCard.remove();
+            }
+        }
+    })
+    .catch(error => console.error("Error deleting project:", error));
+}
+
+
+  </script>
+
+<script>
+  function showFullHash(element, fullHash) {
+      element.innerText = fullHash; // عند تمرير الماوس، يعرض الهاش بالكامل
+  }
+  
+  function hideShortHash(element, shortHash) {
+      element.innerText = shortHash + "..."; // عند إخراج الماوس، يعود إلى الاختصار
+  }
+  
+  function copyHash(fullHash, element) {
+      navigator.clipboard.writeText(fullHash).then(() => {
+          element.innerText = "Copied! ✅"; // يظهر أنه تم النسخ
+          element.style.color = "#4ade80"; // تغيير اللون إلى الأخضر
+  
+          setTimeout(() => {
+              element.innerText = fullHash.substring(0, 10) + "..."; // يرجع للاختصار بعد 3 ثوانٍ
+              element.style.color = "#818cf8"; // يرجع اللون السابق
+          }, 3000);
+      });
+  }
+</script>
+  
+
+
+</body>
+
+</html>

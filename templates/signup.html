@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../static/css/signup.css">
+
+</head>
+
+<body class="flex items-center justify-center min-h-screen px-4">
+    
+    <header class="fixed top-0 w-full bg-gray-800 shadow-lg z-50 py-4 transition-all">
+        <div class="container mx-auto flex justify-between items-center px-6">
+            <!-- رابط يعود إلى الصفحة الرئيسية -->
+            <a href="/" class="text-2xl font-bold text-indigo-400 hover:text-indigo-500 transition-colors">
+                WhiteBox
+            </a>
+        </div>
+    </header>
+    
+
+    <div class="bg-gray-800 shadow-md rounded-lg px-8 pt-6 pb-8 w-full max-w-md">
+
+        <!-- Success Message -->
+        <div id="success-message" class="success-message hidden">
+            Account created successfully! Redirecting...
+        </div>
+
+        <h2 class="text-3xl font-bold text-center mb-2">Create a New Account</h2>
+        <p class="text-center text-gray-400 mb-6">Fill out the fields below to create your account.</p>
+
+        <!-- Form -->
+        <form id="signup-form" action="/signup" method="POST" class="space-y-6">
+
+            <!-- Email Field -->
+            <div class="form-group flex items-center border rounded-lg overflow-hidden">
+                <label for="signup__email" class="px-4 py-2 bg-gray-700 flex items-center">
+                    <i class="fas fa-envelope text-gray-400"></i>
+                </label>
+                <input id="signup__email" type="email" name="email" placeholder="Enter your email address" required
+                    class="flex-1 px-4 py-2 focus:outline-none bg-gray-700 text-white">
+            </div>
+            <span id="email-error" class="validation-message hidden">Please enter a valid email address.</span>
+
+            <!-- Username Field -->
+            <div class="form-group flex items-center border rounded-lg overflow-hidden">
+                <label for="signup__username" class="px-4 py-2 bg-gray-700 flex items-center">
+                    <i class="fas fa-user text-gray-400"></i>
+                </label>
+                <input id="signup__username" type="text" name="username" placeholder="Choose a username" required
+                    class="flex-1 px-4 py-2 focus:outline-none bg-gray-700 text-white">
+            </div>
+            <span id="username-error" class="validation-message hidden">Username is required.</span>
+
+            <!-- Password Field -->
+            <div class="form-group flex flex-col">
+                <div class="flex items-center border rounded-lg overflow-hidden">
+                    <label for="signup__password" class="px-4 py-2 bg-gray-700 flex items-center">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </label>
+                    <input id="signup__password" type="password" name="password" placeholder="Create a password"
+                        required class="flex-1 px-4 py-2 focus:outline-none bg-gray-700 text-white">
+                    <span class="px-4 toggle-password" onclick="togglePassword('signup__password')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                <p class="form-instructions">Password must be at least 8 characters long and include at least one
+                    number, one uppercase letter, and one special character.</p>
+            </div>
+            <span id="password-error" class="validation-message hidden">Password does not meet the requirements.</span>
+
+            <!-- Confirm Password Field -->
+            <div class="form-group flex items-center border rounded-lg overflow-hidden">
+                <label for="signup__confirm-password" class="px-4 py-2 bg-gray-700 flex items-center">
+                    <i class="fas fa-lock text-gray-400"></i>
+                </label>
+                <input id="signup__confirm-password" type="password" name="confirm_password"
+                    placeholder="Confirm your password" required
+                    class="flex-1 px-4 py-2 focus:outline-none bg-gray-700 text-white">
+                <span class="px-4 toggle-password" onclick="togglePassword('signup__confirm-password')">
+                    <i class="fas fa-eye"></i>
+                </span>
+            </div>
+            <span id="confirm-password-error" class="validation-message hidden">Passwords do not match.</span>
+
+            <!-- Submit Button -->
+            <div class="mt-6">
+                <button type="submit"
+                    class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg rounded-lg transition duration-300">
+                    Create Account
+                </button>
+            </div>
+        </form>
+
+        <!-- Log in Link -->
+        <p class="text-center text-sm mt-6 text-gray-400">
+            Already have an account? <a href="login" class="text-blue-400 hover:underline font-medium">Log in here</a>
+        </p>
+        
+    </div>
+
+    <!-- Validation Script -->
+    <script>
+        const togglePassword = (id) => {
+            const input = document.getElementById(id);
+            const icon = input.nextElementSibling.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
+
+        const form = document.getElementById('signup-form');
+        const emailInput = document.getElementById('signup__email');
+        const usernameInput = document.getElementById('signup__username');
+        const passwordInput = document.getElementById('signup__password');
+        const confirmPasswordInput = document.getElementById('signup__confirm-password');
+        const successMessage = document.getElementById('success-message');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            let isValid = true;
+
+            // Validate email
+            if (!emailInput.value.includes('@')) {
+                document.getElementById('email-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('email-error').classList.add('hidden');
+            }
+
+            // Validate username
+            if (!usernameInput.value) {
+                document.getElementById('username-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('username-error').classList.add('hidden');
+            }
+
+            // Validate password
+            const password = passwordInput.value;
+            const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!passwordRegex.test(password)) {
+                document.getElementById('password-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('password-error').classList.add('hidden');
+            }
+
+            // Validate confirm password
+            if (password !== confirmPasswordInput.value) {
+                document.getElementById('confirm-password-error').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('confirm-password-error').classList.add('hidden');
+            }
+
+            if (isValid) {
+                successMessage.classList.remove('hidden');
+                setTimeout(() => {
+                    form.submit();
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackBox Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static/css/analysis-black.css">
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+      
+        /* تأثير النبض */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(139, 92, 246, 0.7); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); }
+        }
+        .pulse-effect {
+            animation: pulse 1.5s infinite;
+        }
+        </style>
+      
+</head>
+
+<body class="text-gray-200 pt-20">
+    <!-- Header -->
+    <header class="fixed top-0 w-full bg-gray-800 shadow-md z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <!-- <a href="#" class="text-2xl font-bold text-indigo-400">BlackBox</a> -->
+            <a href="#" class="flex flex-col items-center text-white font-bold">
+                <div class="flex items-center space-x-2 text-4xl">
+                    <span class="text-indigo-400 tracking-widest">SIA</span>
+                    <i class="fas fa-cube text-purple-400 text-3xl"></i>
+                </div>
+                <span class="text-xs text-purple-300 tracking-widest uppercase mt-1">SecuBox Integrity Analyzer</span>
+              </a>            
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="/analysis" class="bg-indigo-500 px-4 py-2 rounded-lg text-white hover:bg-indigo-600">WhiteBox</a></li>
+                    <li><a href="/logout" class="bg-indigo-500 px-4 py-2 rounded-lg text-white hover:bg-indigo-600">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="pt-28 pb-10 bg-gray-900 text-center">
+        <div class="container mx-auto">
+            <h1 class="text-5xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-transparent bg-clip-text drop-shadow-lg animate-fade-in">Welcome to BlackBox Analysis</h1>
+            <p class="text-xl mt-4 text-gray-400">Start analyzing your targets below:</p>
+        </div>
+    </section>
+    
+    <section class="py-20 bg-gray-800 text-center">
+        <div class="container mx-auto">
+            <form action="/analysis-black" method="POST">
+                <!-- URL Input -->
+                <div class="mb-8">
+                    <label for="url" class="block text-gray-300 text-xl mb-4">Enter Target URL:</label>
+                    <input type="text" id="url" name="url" placeholder="https://example.com"
+                        class="w-full md:w-1/2 p-4 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                </div>
+
+                <!-- Dropdown Menu -->
+                <div class="mb-8">
+                    <label for="scan-type" class="block text-gray-300 text-xl mb-4">Select Scan Type:</label>
+                    <select id="scan-type" name="scan_type" onchange="updateDescription()"
+                        class="w-full md:w-1/2 p-4 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        <option value="" disabled selected>Select Scan Type</option>
+                        <option value="normal">Normal Scan</option>
+                        <option value="delayed">Delayed Scan</option>
+                        <option value="comprehensive">Comprehensive Scan</option>
+                        <option value="fast">Fast Scan</option>
+                        <option value="advanced">Advanced Scan</option>
+                    </select>
+                </div>
+
+                <!-- Description -->
+                <div id="description" class="text-gray-400 text-lg mb-8"></div>
+
+                <!-- Analyze Button -->
+                <button type="submit"
+                    class="custom-button mt-8 w-full md:w-1/2 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition duration-300">
+                    Analyze
+                </button>
+            </form>
+        </div>
+    </section>
+    
+    <section class="py-20 bg-gradient-to-r from-gray-900 via-gray-800 to-black text-center">
+        <div class="container mx-auto">
+            <h2 class="text-5xl font-bold text-indigo-400 mb-10 hacker-shadow">Generated Reports</h2>
+            <p class="text-gray-300 mb-12 text-lg">Reports organized by scanned websites:</p>
+    
+            {% for site, reports in sites_reports.items() %}
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-8 transition duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-2xl">
+                <h3 class="text-3xl font-bold text-white cursor-pointer hacker-shadow mb-4" onclick="toggleReports('{{ site }}')">
+                    {{ site }} ▼
+                </h3>
+                <div id="{{ site }}" class="hidden mt-4 space-y-4">
+                    {% for report in reports %}
+                    <div class="bg-gray-900 p-6 rounded-lg shadow-lg transition duration-500 ease-in-out transform hover:scale-105 hover:shadow-2xl relative">
+                        <h4 class="text-2xl font-semibold text-white">{{ report.name }}</h4>
+                        <p class="text-gray-400 mt-2">Type: {{ report.type }}</p>
+                        <p class="text-gray-400">Created At: {{ report.created_at | datetimeformat }}</p>
+                        <div class="mt-4 flex space-x-4 justify-center">
+                            <!-- زر العرض -->
+                            <a href="{{ url_for('serve_uploads', username=username, report_type='reports_blackbox', filename=site + '/' + report.name) }}" 
+                                target="_blank"
+                                class="px-5 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition duration-300 transform hover:scale-105">
+                                View {{ report.type }} Report
+                            </a>
+                            <!-- زر التحميل -->
+                            <a href="{{ url_for('serve_uploads', username=username, report_type='reports_blackbox', filename=site + '/' + report.name) }}" 
+                                download
+                                class="px-5 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 transform hover:scale-105">
+                                Download {{ report.type }} Report
+                            </a>
+                            <!-- زر الحذف -->
+                            <form action="{{ url_for('delete_blackbox_report', username=username, filename=site + '/' + report.name) }}" method="post" class="inline">
+                                <button type="submit" 
+                                    class="px-5 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 transform hover:scale-105">
+                                    Delete Report
+                                </button>
+                            </form>
+                        </div>
+                        <div class="absolute inset-0 rounded-lg shadow-md pointer-events-none bg-gradient-to-r from-blue-700 via-indigo-800 to-transparent opacity-50 transform scale-105 blur-lg"></div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Hacker-Style Loader -->
+    <div id="hacker-loader" class="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-80 z-50 hidden">
+        <div class="relative">
+            <div class="w-24 h-24 border-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-green-400 text-xl font-mono animate-pulse">Scanning...</span>
+            </div>
+        </div>
+        <div class="mt-6 text-green-400 font-mono text-lg">
+            <span id="hacker-text"></span>
+        </div>
+    </div>
+    <script>
+        const hackerLoader = document.getElementById("hacker-loader");
+        const hackerText = document.getElementById("hacker-text");
+        const randomTexts = [
+            "Initializing attack vector...",
+            "Bypassing firewalls...",
+            "Analyzing security vulnerabilities...",
+            "Deploying exploit modules...",
+            "Data exfiltration in progress...",
+            "Scan finishing soon, detailed report incoming..."
+        ];
+    
+        function startHackerLoader() {
+            hackerLoader.classList.remove("hidden");
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < randomTexts.length) {
+                    hackerText.innerText = randomTexts[index];
+                    index++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 15000);
+        }
+    
+        // تشغيل الـ Loader عند إرسال النموذج
+        document.querySelector("form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            startHackerLoader();
+            setTimeout(() => this.submit(), 9000); // تأخير الإرسال لمحاكاة الفحص
+        });
+    </script>
+    
+
+
+    <script>
+        function deleteBlackboxReport(event, username, filename, element) {
+            event.preventDefault();  // منع تحديث الصفحة
+        
+            fetch(`/delete-report/${username}/reports_blackbox/${encodeURIComponent(filename)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())  // تحويل الاستجابة إلى JSON
+            .then(data => {
+                if (data.success) {
+                    const reportItem = element.closest('.bg-gray-900');  // تحديد العنصر الأب للحذف
+                    if (reportItem) {
+                        reportItem.remove();  // إزالة التقرير مباشرة دون أي رسالة
+                    }
+                }
+            })
+            .catch(error => console.error("❌ خطأ أثناء الحذف:", error));
+        }
+    </script>
+    
+    <script>
+    function toggleReports(site) {
+        var reportsDiv = document.getElementById(site);
+        reportsDiv.classList.toggle("hidden");
+    }
+    </script>
+    
+    
+    <script>
+    function toggleReports(site) {
+        var reportsDiv = document.getElementById(site);
+        reportsDiv.classList.toggle("hidden");
+    }
+    </script>
+    
+    <script>
+        function updateDescription() {
+            const descriptions = {
+                normal: "A quick scan using default configurations.",
+                delayed: "A scan with reduced request rate to avoid detection.",
+                comprehensive: "A scan using CVE, misconfigurations, and exposures.",
+                fast: "A fast scan with fewer requests and less detailed results.",
+                advanced: "An advanced scan with XSS, SQLi, SSRF targeting."
+            };
+
+            const selected = document.getElementById('scan-type').value;
+            const descriptionDiv = document.getElementById('description');
+            descriptionDiv.textContent = descriptions[selected] || "";
+        }
+    </script>
+</body>
+
+</html>
