@@ -21,10 +21,15 @@ SECUBOX INTEGRITY ANALYZER هو نظام تحليل أمني متكامل يسا
 1️⃣ المتطلبات الأساسية
 
 Python 3.8+
+
 Flask
+
 SQLite3
+
 Nuclei (لتحليل BlackBox)
+
 Semgrep, Bandit, Flawfinder
+
 2️⃣ تثبيت الحزم المطلوبة
 pip install -r requirements.txt
 3️⃣ تثبيت أداة Nuclei (لتحليل BlackBox)
