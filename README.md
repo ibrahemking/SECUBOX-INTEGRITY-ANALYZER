@@ -31,11 +31,17 @@ Nuclei (لتحليل BlackBox)
 Semgrep, Bandit, Flawfinder
 
 2️⃣ تثبيت الحزم المطلوبة
+
 pip install -r requirements.txt
+
 3️⃣ تثبيت أداة Nuclei (لتحليل BlackBox)
+
 sudo apt install nuclei -y
+
 4️⃣ تحميل قوالب Nuclei ووضعها في المجلد /home/username
+
 git clone https://github.com/projectdiscovery/nuclei-templates.git ~/.nuclei-templates
+
 للتحقق من نجاح العملية:
 ls ~/.nuclei-templates
 5️⃣ تشغيل التطبيق
